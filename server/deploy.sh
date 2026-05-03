@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Deploy the Maddy's Memories API to Cloud Run.
-# Reads required secrets from your shell env. See README for what to set first.
+# Secrets live in Google Secret Manager; this script only references them.
+# To rotate a value: `gcloud secrets versions add MM_<NAME> --project printful-manager --data-file=-`
 
 set -euo pipefail
 
@@ -11,19 +12,6 @@ BUCKET="${GCS_BUCKET:-maddysmemories-photos}"
 ALLOWED_ORIGIN="${ALLOWED_ORIGIN:-https://maddysmemories.com}"
 OCR_MODEL="${OCR_MODEL:-claude-opus-4-7}"
 
-require() {
-  local name="$1"
-  if [ -z "${!name:-}" ]; then
-    echo "ERROR: $name is not set in your shell." >&2
-    return 1
-  fi
-}
-
-require ANTHROPIC_API_KEY || exit 1
-require ADMIN_PASSWORD || exit 1
-require FAMILY_PASSWORD || exit 1
-require AUTH_SECRET || exit 1
-
 cd "$(dirname "$0")"
 
 # Make sure the bucket exists (idempotent)
@@ -33,10 +21,20 @@ if ! gcloud storage buckets describe "gs://${BUCKET}" --project "$PROJECT" >/dev
     --project "$PROJECT" \
     --location "$REGION" \
     --uniform-bucket-level-access
-  # Allow public read of objects (only the photos we put there)
   gcloud storage buckets add-iam-policy-binding "gs://${BUCKET}" \
     --member=allUsers --role=roles/storage.objectViewer --project "$PROJECT"
 fi
+
+# Grant the Cloud Run runtime service account access to the secrets (idempotent).
+PROJ_NUM=$(gcloud projects describe "$PROJECT" --format="value(projectNumber)")
+RUNTIME_SA="${PROJ_NUM}-compute@developer.gserviceaccount.com"
+for secret in MM_ANTHROPIC_API_KEY MM_ADMIN_PASSWORD MM_FAMILY_PASSWORD MM_AUTH_SECRET; do
+  gcloud secrets add-iam-policy-binding "$secret" \
+    --project "$PROJECT" \
+    --member="serviceAccount:${RUNTIME_SA}" \
+    --role="roles/secretmanager.secretAccessor" \
+    --condition=None >/dev/null 2>&1 || true
+done
 
 gcloud run deploy "$SERVICE" \
   --project "$PROJECT" \
@@ -48,13 +46,11 @@ gcloud run deploy "$SERVICE" \
   --timeout 120 \
   --concurrency 20 \
   --max-instances 5 \
-  --set-env-vars "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY},ADMIN_PASSWORD=${ADMIN_PASSWORD},FAMILY_PASSWORD=${FAMILY_PASSWORD},AUTH_SECRET=${AUTH_SECRET},GCS_BUCKET=${BUCKET},ALLOWED_ORIGIN=${ALLOWED_ORIGIN},OCR_MODEL=${OCR_MODEL}"
+  --set-env-vars "GCS_BUCKET=${BUCKET},ALLOWED_ORIGIN=${ALLOWED_ORIGIN},OCR_MODEL=${OCR_MODEL}" \
+  --set-secrets "ANTHROPIC_API_KEY=MM_ANTHROPIC_API_KEY:latest,ADMIN_PASSWORD=MM_ADMIN_PASSWORD:latest,FAMILY_PASSWORD=MM_FAMILY_PASSWORD:latest,AUTH_SECRET=MM_AUTH_SECRET:latest"
 
 URL=$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.url)')
 echo
 echo "========================================"
 echo "Service URL: $URL"
-echo "Set this as the GitHub Actions repo variable VITE_API_URL:"
-echo "  gh variable set VITE_API_URL --body '$URL' --repo zelidav/maddysmemories"
-echo "Then push any commit and the site will rebuild against the live API."
 echo "========================================"

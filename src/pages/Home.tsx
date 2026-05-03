@@ -1,14 +1,16 @@
 import { Link } from 'react-router-dom';
 import { role } from '../lib/auth';
 import FloralAccent from '../components/FloralAccent';
+import PhotoCarousel from '../components/PhotoCarousel';
 
 export default function Home() {
   const r = role();
 
   return (
     <div className="home">
+      <PhotoCarousel intervalMs={6000} />
       <section className="home-hero">
-        <img src="/maddy-avatar.jpg" alt="Maddy" />
+        <img src="/maddy-avatar.jpg" alt="Maddy" className="hero-avatar" />
         <h1 className="serif italic">Welcome.</h1>
         <p className="muted">
           Recipes from the kitchen. Stories from a long, full life.

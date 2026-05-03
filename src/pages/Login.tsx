@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { login } from '../lib/api';
 import { setAdminToken, setFamilyToken } from '../lib/auth';
+import PhotoBackdrop from '../components/PhotoBackdrop';
 
 export default function Login() {
   const nav = useNavigate();
@@ -31,6 +32,8 @@ export default function Login() {
   };
 
   return (
+    <>
+    <PhotoBackdrop className="page-backdrop" />
     <div className="login-card">
       <h1>Welcome back</h1>
       <p className="muted">Two doors. Same kitchen.</p>
@@ -69,5 +72,6 @@ export default function Login() {
         </button>
       </form>
     </div>
+    </>
   );
 }

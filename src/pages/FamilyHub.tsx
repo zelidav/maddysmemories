@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { listJournal, listRecipes } from '../lib/api';
 import { JournalEntry, Recipe } from '../lib/types';
 import FloralAccent from '../components/FloralAccent';
+import MemoriesStrip from '../components/MemoriesStrip';
 
 function formatDate(iso: string) {
   if (!iso) return '';
@@ -29,10 +30,12 @@ export default function FamilyHub() {
   return (
     <>
       <section className="home-hero">
-        <img src="/maddy-avatar.jpg" alt="Maddy" />
+        <img src="/maddy-avatar.jpg" alt="Maddy" className="hero-avatar" />
         <h1 className="serif">From Grandma's kitchen</h1>
         <p className="muted">Recipes she's preserved, stories she's told.</p>
       </section>
+
+      <MemoriesStrip count={8} title="A few memories" />
 
       {loading ? (
         <div className="empty-state"><p>Opening Grandma's box…</p></div>
