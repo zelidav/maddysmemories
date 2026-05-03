@@ -1,98 +1,37 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#a83244">
-<title>Maddy's Memories</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<header>
-  <h1>Maddy's Memories</h1>
-  <p class="tagline">Recipes &amp; stories from Grandma Maddy's kitchen</p>
-  <span class="hdr-flora" aria-hidden="true">&#x273F;</span>
-  <button id="tools-btn" class="tools-btn" type="button" aria-label="Tools" title="Tools">&#x22EE;</button>
-</header>
-
-<div id="tools-menu" class="tools-menu" hidden>
-  <button id="export-all" type="button">Export all (JSON)</button>
-  <button id="import-json" type="button">Import JSON&hellip;</button>
-  <input id="import-file" type="file" accept="application/json,.json" hidden>
-</div>
-
-<main>
-  <section id="home" class="view active">
-    <button id="add-recipe" class="big-btn primary">New Recipe</button>
-    <input id="search" class="search" type="search" placeholder="Search recipes&hellip;" autocomplete="off">
-    <ul id="recipe-list" class="recipe-list" aria-label="Saved recipes"></ul>
-  </section>
-
-  <section id="capture" class="view">
-    <button class="back-btn" type="button">&lsaquo; Back</button>
-    <h2>Photograph the recipe card</h2>
-    <p class="hint">Lay the card flat. Get good light. Fill the frame.</p>
-    <label class="big-btn primary" for="photo-input">Take Photo</label>
-    <input id="photo-input" type="file" accept="image/*" capture="environment" hidden>
-    <div id="preview-wrap" hidden>
-      <img id="preview" alt="Recipe preview">
-      <div id="ocr-status" role="status" aria-live="polite"></div>
-      <button id="retake" class="big-btn" type="button">Retake</button>
-      <button id="continue" class="big-btn primary" type="button">Continue</button>
-    </div>
-  </section>
-
-  <section id="edit" class="view">
-    <button class="back-btn" type="button">&lsaquo; Back</button>
-    <h2>Recipe Details</h2>
-    <div class="split">
-      <div class="split-photo">
-        <img id="e-photo" alt="Recipe card photo">
-      </div>
-      <div class="split-form">
-        <label for="recipe-title">Recipe name</label>
-        <input id="recipe-title" type="text" placeholder="e.g. Grandma's Apple Pie" autocomplete="off">
-
-        <label for="recipe-source">Where is this recipe from?</label>
-        <textarea id="recipe-source" rows="2" placeholder="e.g. From Aunt Rose, summer 1962"></textarea>
-        <button id="voice-source" class="voice-btn" type="button" aria-label="Dictate where it's from">Dictate</button>
-
-        <label for="recipe-for">Who would love this? <span class="optional">(optional)</span></label>
-        <input id="recipe-for" type="text" placeholder="e.g. for the grandkids" autocomplete="off">
-
-        <label for="recipe-text">The recipe</label>
-        <p class="hint">We tried to read the card. Fix anything wrong, or dictate it.</p>
-        <textarea id="recipe-text" rows="12" placeholder="Ingredients and steps..."></textarea>
-        <button id="voice-text" class="voice-btn" type="button" aria-label="Dictate the recipe">Dictate</button>
-
-        <button id="save-recipe" class="big-btn primary" type="button">Save</button>
-      </div>
-    </div>
-  </section>
-
-  <section id="detail" class="view">
-    <button class="back-btn" type="button">&lsaquo; Back</button>
-    <h2 id="d-title"></h2>
-    <p id="d-source" class="source"></p>
-    <p id="d-for" class="for-tag" hidden></p>
-    <div class="split">
-      <div class="split-photo">
-        <img id="d-photo" alt="Recipe card">
-      </div>
-      <div class="split-form">
-        <pre id="d-text"></pre>
-        <button id="share-recipe" class="big-btn primary" type="button">Share</button>
-        <button id="edit-recipe" class="big-btn" type="button">Edit</button>
-        <button id="delete-recipe" class="big-btn danger" type="button">Delete</button>
-      </div>
-    </div>
-  </section>
-</main>
-
-<script src="config.js"></script>
-<script src="app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#E8574A" />
+    <title>Maddy's Memories</title>
+    <meta name="description" content="Recipes &amp; stories from Madeline's kitchen — a family heirloom." />
+    <meta property="og:title" content="Maddy's Memories" />
+    <meta property="og:description" content="Recipes &amp; stories from Madeline's kitchen — a family heirloom." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://maddysmemories.com/maddy-avatar.jpg" />
+    <meta property="og:url" content="https://maddysmemories.com/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script>
+      // SPA path restore (paired with public/404.html)
+      (function(){
+        var s = window.location.search;
+        var m = s.match(/^\?\/(.*)/);
+        if (m) {
+          var decoded = decodeURIComponent(m[1]);
+          window.history.replaceState(null, '', decoded + window.location.hash);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

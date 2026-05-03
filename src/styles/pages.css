@@ -1,0 +1,367 @@
+/* Home */
+.home-hero {
+  text-align: center;
+  padding: 1rem 0 2rem;
+}
+.home-hero img {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--paper);
+  box-shadow: 0 8px 28px var(--shadow-deep);
+  margin-bottom: 1rem;
+}
+.home-hero h1 { margin: 0.5rem 0; }
+.home-hero p { color: var(--ink-soft); max-width: 32ch; margin: 0 auto 1.25rem; }
+
+.home-cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 760px) {
+  .home-cards { grid-template-columns: repeat(3, 1fr); }
+}
+.home-card {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.25rem 1.75rem;
+  box-shadow: 0 4px 18px var(--shadow);
+  transition: transform 0.12s, box-shadow 0.12s;
+  overflow: hidden;
+}
+.home-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px var(--shadow-deep); }
+.home-card .home-card-flora {
+  position: absolute;
+  top: -16px;
+  right: -10px;
+  width: 78px;
+  height: 78px;
+  opacity: 0.32;
+  transform: rotate(15deg);
+}
+.home-card h2 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  margin: 0 0 0.35rem;
+}
+.home-card p { color: var(--ink-soft); margin: 0; }
+
+/* Lists */
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.5rem 0 1.25rem;
+}
+.section-head h1 { margin: 0; }
+.section-head .section-sub { color: var(--ink-soft); font-style: italic; font-size: 0.95rem; }
+
+.toolbar {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.toolbar input.search {
+  flex: 1 1 220px;
+  border-radius: 999px;
+  background: var(--paper);
+}
+.chip-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.chip {
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chip.active { background: var(--sage-soft); border-color: var(--sage); color: #2f4d27; }
+
+.recipe-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 560px) { .recipe-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .recipe-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.recipe-card-tile {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 16px var(--shadow);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.recipe-card-tile:hover { transform: translateY(-2px); box-shadow: 0 10px 24px var(--shadow-deep); }
+.recipe-card-tile .photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--cream-deep);
+  object-fit: cover;
+  display: block;
+}
+.recipe-card-tile .body { padding: 0.85rem 1rem 1rem; }
+.recipe-card-tile h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin: 0 0 0.25rem;
+}
+.recipe-card-tile .source { color: var(--ink-soft); font-size: 0.9rem; font-style: italic; }
+.recipe-card-tile .meta-row { display: flex; gap: 0.4rem; margin-top: 0.6rem; flex-wrap: wrap; }
+
+/* Recipe detail — index-card look */
+.recipe-card-page {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) {
+  .recipe-card-page { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; }
+}
+.recipe-card-paper {
+  background: var(--paper);
+  background-image:
+    repeating-linear-gradient(transparent, transparent 30px, rgba(125, 175, 110, 0.18) 30px, rgba(125, 175, 110, 0.18) 31px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--paper-edge);
+  padding: 1.5rem 1.5rem 2rem 3rem;
+  position: relative;
+  box-shadow: 0 8px 28px var(--shadow);
+}
+.recipe-card-paper::before {
+  content: '';
+  position: absolute;
+  left: 2.25rem;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--tulip);
+  opacity: 0.4;
+}
+.recipe-card-paper h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 4vw, 2.25rem);
+  margin: 0 0 0.25rem;
+}
+.recipe-card-paper .source { color: var(--ink-soft); font-style: italic; margin-bottom: 1rem; }
+.recipe-card-paper .meta-row { display: flex; gap: 0.5rem; margin: 0.5rem 0 1.25rem; flex-wrap: wrap; }
+.recipe-card-paper h3 {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tulip-deep);
+  margin: 1.25rem 0 0.5rem;
+}
+.recipe-card-paper .ingredients,
+.recipe-card-paper .instructions,
+.recipe-card-paper .raw-text {
+  white-space: pre-wrap;
+  font-family: var(--font-sans);
+  line-height: 1.7;
+}
+
+.photo-stack {
+  position: sticky;
+  top: 5.5rem;
+}
+.photo-stack img {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 32px var(--shadow-deep);
+  border: 4px solid var(--paper);
+  cursor: zoom-in;
+}
+.photo-caption { color: var(--ink-soft); font-size: 0.85rem; text-align: center; margin-top: 0.5rem; font-style: italic; }
+
+/* Edit forms */
+.edit-form {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) {
+  .edit-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: start; }
+}
+.edit-photo {
+  position: sticky;
+  top: 5.5rem;
+}
+.edit-photo .placeholder {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  background: var(--cream-deep);
+  border: 2px dashed var(--paper-edge);
+  border-radius: var(--radius-lg);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+.edit-photo img {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  border: 4px solid var(--paper);
+  box-shadow: 0 8px 24px var(--shadow);
+}
+.edit-photo .photo-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+.ocr-status {
+  background: var(--daffodil-soft);
+  border-left: 4px solid var(--daffodil);
+  color: #6b4f00;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  margin: 0.65rem 0 0;
+  font-size: 0.92rem;
+}
+
+.field-row { display: grid; gap: 0.85rem; grid-template-columns: 1fr 1fr; }
+@media (max-width: 559px) { .field-row { grid-template-columns: 1fr; } }
+
+.dictate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.9rem;
+  background: transparent;
+  border: 1.5px solid var(--paper-edge);
+  border-radius: 999px;
+  color: var(--ink-soft);
+}
+.dictate-btn.active {
+  background: var(--tulip);
+  color: #fff;
+  border-color: var(--tulip-deep);
+  animation: pulse 1.3s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(232,87,74,0.4); } 50% { box-shadow: 0 0 0 10px rgba(232,87,74,0); } }
+
+/* Journal */
+.journal-timeline {
+  position: relative;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--sage);
+}
+.journal-entry {
+  position: relative;
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--paper-edge);
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 14px var(--shadow);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.journal-entry::before {
+  content: '';
+  position: absolute;
+  left: -1.7rem;
+  top: 1.5rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: var(--daffodil);
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 2px var(--sage);
+}
+.journal-entry .date {
+  color: var(--tulip-deep);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.journal-entry h3 { font-family: var(--font-serif); font-size: 1.35rem; margin: 0.25rem 0 0.5rem; }
+.journal-entry .preview { color: var(--ink-soft); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+.journal-page {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.75rem 2.5rem;
+  box-shadow: 0 8px 28px var(--shadow);
+  background-image: repeating-linear-gradient(transparent, transparent 32px, rgba(168, 206, 222, 0.15) 32px, rgba(168, 206, 222, 0.15) 33px);
+}
+.journal-page .date { color: var(--tulip-deep); font-weight: 600; font-size: 0.9rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.journal-page h1 { margin: 0.4rem 0 1.5rem; }
+.journal-page .body {
+  white-space: pre-wrap;
+  line-height: 1.75;
+  font-size: 1.08rem;
+}
+
+/* Login */
+.login-card {
+  max-width: 440px;
+  margin: 2rem auto;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.75rem;
+  box-shadow: 0 8px 28px var(--shadow);
+}
+.login-card h1 { margin: 0 0 0.5rem; font-family: var(--font-serif); }
+.login-card .role-tabs { display: flex; gap: 0.5rem; margin: 1.25rem 0 1rem; }
+.login-card .role-tabs button {
+  flex: 1;
+  background: transparent;
+  border: 1.5px solid var(--paper-edge);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.login-card .role-tabs button.active { background: var(--daffodil-soft); border-color: var(--daffodil); color: var(--ink); }
+
+/* Comments */
+.comments {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--paper-edge);
+}
+.comments h3 { font-family: var(--font-serif); margin: 0 0 1rem; }
+.comment {
+  background: var(--cream-deep);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.65rem;
+}
+.comment .who { font-weight: 600; color: var(--tulip-deep); }
+.comment .when { color: var(--ink-soft); font-size: 0.8rem; margin-left: 0.5rem; }
+.comment .body { margin-top: 0.25rem; white-space: pre-wrap; }
+.comment-form { margin-top: 1rem; display: grid; gap: 0.65rem; }
+
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem 2rem;
+  color: var(--ink-soft);
+}
+.empty-state h3 { font-family: var(--font-serif); color: var(--ink); margin-bottom: 0.5rem; }

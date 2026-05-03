@@ -1,0 +1,42 @@
+:root {
+  /* Spring garden palette */
+  --cream: #FAF3E0;
+  --cream-deep: #F4EAD0;
+  --daffodil: #F5C842;
+  --daffodil-soft: #FBE7A6;
+  --tulip: #E8574A;
+  --tulip-deep: #C73E32;
+  --sage: #7DAF6E;
+  --sage-soft: #C8DEC0;
+  --sky: #A8CEDE;
+  --ink: #2C2A26;
+  --ink-soft: #5C564E;
+  --paper: #FFFCF5;
+  --paper-edge: #E9DDC0;
+  --shadow: rgba(74, 60, 40, 0.12);
+  --shadow-deep: rgba(74, 60, 40, 0.22);
+
+  /* Typography */
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  /* Layout */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.85rem;
+  --radius-lg: 1.25rem;
+  --max-content: 1080px;
+  --nav-height: 4.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cream: #1f1c17;
+    --cream-deep: #16140f;
+    --paper: #2a2620;
+    --paper-edge: #3a352b;
+    --ink: #f4ead0;
+    --ink-soft: #c8bea4;
+    --shadow: rgba(0, 0, 0, 0.4);
+    --shadow-deep: rgba(0, 0, 0, 0.6);
+  }
+}
