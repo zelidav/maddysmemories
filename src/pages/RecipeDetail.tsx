@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { deleteRecipe, getRecipe } from '../lib/api';
 import { Recipe } from '../lib/types';
 import { fbShareUrl, shareRecipe } from '../lib/share';
+import { scaleBlock } from '../lib/scale';
 import Comments from '../components/Comments';
 
 export default function RecipeDetail({ readOnly = false }: { readOnly?: boolean }) {
@@ -11,6 +12,7 @@ export default function RecipeDetail({ readOnly = false }: { readOnly?: boolean 
   const [r, setR] = useState<Recipe | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [err, setErr] = useState('');
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     if (!id) return;
@@ -70,7 +72,26 @@ export default function RecipeDetail({ readOnly = false }: { readOnly?: boolean 
         {r.ingredients && (
           <>
             <h3>Ingredients</h3>
-            <div className="ingredients">{r.ingredients}</div>
+            <div className="scale-row" role="group" aria-label="Scale recipe">
+              <span className="muted" style={{ fontSize: '0.85rem', marginRight: '0.5rem' }}>Make:</span>
+              {[0.5, 1, 2, 3].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={'chip' + (scale === s ? ' active' : '')}
+                  onClick={() => setScale(s)}
+                >
+                  {s === 1 ? 'as written' : `${s}×`}
+                </button>
+              ))}
+            </div>
+            <div className="ingredients">{scaleBlock(r.ingredients, scale)}</div>
+            {scale !== 1 && (
+              <details className="muted" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                <summary style={{ cursor: 'pointer', fontStyle: 'italic' }}>See original quantities</summary>
+                <div className="ingredients" style={{ marginTop: '0.5rem' }}>{r.ingredients}</div>
+              </details>
+            )}
           </>
         )}
         {r.instructions && (

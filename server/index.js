@@ -13,14 +13,41 @@ const FAMILY_PASSWORD = process.env.FAMILY_PASSWORD || '';
 const AUTH_SECRET = process.env.AUTH_SECRET || crypto.randomBytes(32).toString('hex');
 const BUCKET = process.env.GCS_BUCKET || 'maddysmemories-photos';
 
-const SYSTEM_PROMPT = `You transcribe recipe cards. Many are handwritten, old, faded, stained, or written in cursive.
+const SYSTEM_PROMPT = `You transcribe and structure recipe cards. Many are handwritten, old, faded, stained, or in cursive.
 
-Rules:
-- Output ONLY the transcribed text. No preamble, no commentary, no markdown fences.
-- Preserve the original line breaks and visual structure (title, ingredient list, steps).
-- Keep original spelling, abbreviations (tsp, T., doz., oz.), and quirks. Do not modernize or clean up.
-- For a word you genuinely cannot read, write [?]. Do not guess.
-- If the image is not a recipe card, return the literal string: NOT_A_RECIPE`;
+Return JSON with these fields:
+- not_a_recipe: true only if the image is clearly not a recipe (a portrait, a landscape, a screenshot, etc.). Otherwise false.
+- title: the recipe's title as written (e.g. "Grandma's Apple Pie"). Empty string if no title is visible.
+- source: any attribution like "From Aunt Rose, 1962" written on the card. Empty string if absent.
+- category: one of breakfast, lunch, dinner, dessert, snacks, drinks, or other. Best guess from the dish.
+- prep_time: any cook/prep/bake time written on the card (e.g. "30 min", "Bake 1 hr at 350°"). Empty string if absent.
+- ingredients: an array of strings, one ingredient per item, each as written on the card with its quantity and unit (e.g. "1 1/2 cups flour", "3 eggs", "pinch of salt"). Preserve original abbreviations (tsp, T., oz., doz.).
+- instructions: an array of strings, one step per item, in order, as written.
+- raw_text: the verbatim transcription of the entire card, preserving the original line breaks and visual structure.
+
+Rules for transcription:
+- Preserve original spelling and quirks. Do not modernize.
+- For a word you genuinely cannot read, write [?] in raw_text and either omit it from ingredients/instructions or include "[?]" in place of the word.
+- Do not invent ingredients, steps, quantities, or temperatures.
+- If the card has only ingredients (no instructions) or only instructions (no ingredients), still fill the other field as an empty array.
+
+Output JSON only. No commentary, no markdown fences.`;
+
+const RECIPE_SCHEMA = {
+  type: 'object',
+  properties: {
+    not_a_recipe: { type: 'boolean' },
+    title: { type: 'string' },
+    source: { type: 'string' },
+    category: { type: 'string', enum: ['breakfast', 'lunch', 'dinner', 'dessert', 'snacks', 'drinks', 'other'] },
+    prep_time: { type: 'string' },
+    ingredients: { type: 'array', items: { type: 'string' } },
+    instructions: { type: 'array', items: { type: 'string' } },
+    raw_text: { type: 'string' },
+  },
+  required: ['not_a_recipe', 'title', 'source', 'category', 'prep_time', 'ingredients', 'instructions', 'raw_text'],
+  additionalProperties: false,
+};
 
 const anthropic = new Anthropic();
 const db = new Firestore();
@@ -125,20 +152,36 @@ app.post('/ocr', requireAdmin, async (req, res) => {
 
     const response = await anthropic.messages.create({
       model: MODEL,
-      max_tokens: 4000,
+      max_tokens: 8000,
       system: SYSTEM_PROMPT,
+      output_config: {
+        format: { type: 'json_schema', schema: RECIPE_SCHEMA },
+      },
       messages: [{
         role: 'user',
         content: [
           { type: 'image', source: { type: 'base64', media_type: parsed.mediaType, data: parsed.data } },
-          { type: 'text', text: 'Transcribe this recipe card.' },
+          { type: 'text', text: 'Transcribe and structure this recipe card.' },
         ],
       }],
     });
-    const text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim();
-    if (text === 'NOT_A_RECIPE') return res.json({ text: '', not_a_recipe: true });
+    const raw = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('').trim();
+    let parsedJson;
+    try {
+      parsedJson = JSON.parse(raw);
+    } catch (parseErr) {
+      console.warn('OCR JSON parse failed, returning text only:', raw.slice(0, 200));
+      return res.json({ text: raw, not_a_recipe: false });
+    }
     res.json({
-      text,
+      not_a_recipe: !!parsedJson.not_a_recipe,
+      title: parsedJson.title || '',
+      source: parsedJson.source || '',
+      category: parsedJson.category || 'other',
+      prep_time: parsedJson.prep_time || '',
+      ingredients: Array.isArray(parsedJson.ingredients) ? parsedJson.ingredients : [],
+      instructions: Array.isArray(parsedJson.instructions) ? parsedJson.instructions : [],
+      text: parsedJson.raw_text || '',
       usage: { input_tokens: response.usage.input_tokens, output_tokens: response.usage.output_tokens },
     });
   } catch (err) {
@@ -152,28 +195,98 @@ app.post('/ocr', requireAdmin, async (req, res) => {
 
 /* ============ Photo upload ============ */
 
+async function uploadImageToGcs(parsed, prefix) {
+  const buf = Buffer.from(parsed.data, 'base64');
+  const id = newId(prefix);
+  const bucket = storage.bucket(BUCKET);
+  const main = await sharp(buf).rotate().resize(2000, 2000, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 86, progressive: true }).toBuffer();
+  const thumb = await sharp(buf).rotate().resize(640, 640, { fit: 'cover' }).jpeg({ quality: 80, progressive: true }).toBuffer();
+  const meta = await sharp(main).metadata();
+  const mainObj = bucket.file(`${prefix}/${id}.jpg`);
+  const thumbObj = bucket.file(`${prefix}/${id}-thumb.jpg`);
+  await Promise.all([
+    mainObj.save(main, { contentType: 'image/jpeg', metadata: { cacheControl: 'public, max-age=31536000, immutable' } }),
+    thumbObj.save(thumb, { contentType: 'image/jpeg', metadata: { cacheControl: 'public, max-age=31536000, immutable' } }),
+  ]);
+  return {
+    id,
+    photoUrl: `https://storage.googleapis.com/${BUCKET}/${prefix}/${id}.jpg`,
+    photoThumbUrl: `https://storage.googleapis.com/${BUCKET}/${prefix}/${id}-thumb.jpg`,
+    width: meta.width || 0,
+    height: meta.height || 0,
+    mainKey: `${prefix}/${id}.jpg`,
+    thumbKey: `${prefix}/${id}-thumb.jpg`,
+  };
+}
+
 app.post('/upload', requireAdmin, async (req, res) => {
   try {
     const parsed = parseDataUrl(req.body?.image);
     if (!parsed) return res.status(400).json({ error: 'Expected { image: dataURL }.' });
-
-    const buf = Buffer.from(parsed.data, 'base64');
-    const id = newId('img');
-    const bucket = storage.bucket(BUCKET);
-
-    const main = await sharp(buf).rotate().jpeg({ quality: 88 }).toBuffer();
-    const thumb = await sharp(buf).rotate().resize(640, 640, { fit: 'cover' }).jpeg({ quality: 80 }).toBuffer();
-
-    const mainObj = bucket.file(`photos/${id}.jpg`);
-    const thumbObj = bucket.file(`photos/${id}-thumb.jpg`);
-    await mainObj.save(main, { contentType: 'image/jpeg', metadata: { cacheControl: 'public, max-age=31536000, immutable' } });
-    await thumbObj.save(thumb, { contentType: 'image/jpeg', metadata: { cacheControl: 'public, max-age=31536000, immutable' } });
-
-    const photoUrl = `https://storage.googleapis.com/${BUCKET}/photos/${id}.jpg`;
-    const photoThumbUrl = `https://storage.googleapis.com/${BUCKET}/photos/${id}-thumb.jpg`;
-    res.json({ photoUrl, photoThumbUrl });
+    const r = await uploadImageToGcs(parsed, 'photos');
+    res.json({ photoUrl: r.photoUrl, photoThumbUrl: r.photoThumbUrl });
   } catch (err) {
     console.error('Upload error:', err);
+    res.status(500).json({ error: String(err.message || err) });
+  }
+});
+
+/* ============ Family Photos (rotating gallery) ============ */
+
+const familyPhotosCol = () => db.collection('family_photos');
+
+app.get('/photos', requireAuthenticated, async (_req, res) => {
+  const snap = await familyPhotosCol().orderBy('createdAt', 'desc').get();
+  res.json({ photos: snap.docs.map((d) => d.data()) });
+});
+
+app.post('/photos', requireAuthenticated, async (req, res) => {
+  try {
+    const parsed = parseDataUrl(req.body?.image);
+    if (!parsed) return res.status(400).json({ error: 'Expected { image: dataURL }.' });
+    const r = await uploadImageToGcs(parsed, 'family');
+    const aspect = r.width && r.height ? r.width / r.height : 1;
+    const photo = {
+      id: r.id,
+      src: r.photoUrl,
+      thumb: r.photoThumbUrl,
+      width: r.width,
+      height: r.height,
+      aspect,
+      portrait: r.height > r.width,
+      caption: (req.body.caption || '').toString().slice(0, 280),
+      uploaderName: (req.body.uploaderName || '').toString().slice(0, 60),
+      uploaderRole: req.role,
+      uploaderId: (req.body.uploaderId || '').toString().slice(0, 64),
+      mainKey: r.mainKey,
+      thumbKey: r.thumbKey,
+      createdAt: now(),
+    };
+    await familyPhotosCol().doc(r.id).set(photo);
+    res.json(photo);
+  } catch (err) {
+    console.error('Photo upload error:', err);
+    res.status(500).json({ error: String(err.message || err) });
+  }
+});
+
+app.delete('/photos/:id', requireAuthenticated, async (req, res) => {
+  try {
+    const ref = familyPhotosCol().doc(req.params.id);
+    const doc = await ref.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Not found.' });
+    const photo = doc.data();
+    const ownsIt = req.body?.uploaderId && photo.uploaderId === req.body.uploaderId;
+    if (req.role !== 'admin' && !ownsIt) {
+      return res.status(403).json({ error: 'Only Maddy or the uploader can remove this photo.' });
+    }
+    const bucket = storage.bucket(BUCKET);
+    if (photo.mainKey) await bucket.file(photo.mainKey).delete().catch(() => {});
+    if (photo.thumbKey) await bucket.file(photo.thumbKey).delete().catch(() => {});
+    await ref.delete();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Photo delete error:', err);
     res.status(500).json({ error: String(err.message || err) });
   }
 });

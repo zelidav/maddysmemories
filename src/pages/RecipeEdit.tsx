@@ -75,14 +75,31 @@ export default function RecipeEdit() {
       try {
         const r = await ocr(ocrSized);
         if (r.notARecipe) {
-          setOcrStatus('That doesn\'t look like a recipe — but the photo is saved.');
-        } else if (r.text) {
-          setText(r.text);
-          setOcrStatus('Read it. Edit anything that came through wrong.');
+          setOcrStatus("That doesn't look like a recipe — but the photo is saved.");
+        } else if (r.text || r.title || (r.ingredientsList && r.ingredientsList.length)) {
+          setText(r.text || '');
+          // Only auto-fill empty fields, never overwrite what Maddy typed
+          if (r.title && !title) setTitle(r.title);
+          if (r.source && !source) setSource(r.source);
+          if (r.category && (category === 'other' || !category)) {
+            const allowed: RecipeCategory[] = ['breakfast','lunch','dinner','dessert','snacks','drinks','other'];
+            if (allowed.includes(r.category as RecipeCategory)) setCategory(r.category as RecipeCategory);
+          }
+          if (r.prepTime && !prepTime) setPrepTime(r.prepTime);
+          if (r.ingredientsList && r.ingredientsList.length && !ingredients) {
+            setIngredients(r.ingredientsList.join('\n'));
+          }
+          if (r.instructionsList && r.instructionsList.length && !instructions) {
+            setInstructions(r.instructionsList.map((s, i) => `${i + 1}. ${s}`).join('\n'));
+          }
+          const filledCount = [r.title, r.ingredientsList?.length, r.instructionsList?.length, r.prepTime, r.category].filter(Boolean).length;
+          setOcrStatus(filledCount >= 3
+            ? 'Read it and pulled out the parts. Edit anything that came through wrong.'
+            : 'Read what we could. Fill in the rest below.');
         } else if (isLocalOnly) {
           setOcrStatus('Photo saved. Type or dictate the recipe below.');
         } else {
-          setOcrStatus('We couldn\'t read this one — type or dictate the recipe below.');
+          setOcrStatus("We couldn't read this one — type or dictate the recipe below.");
         }
       } catch (oe: any) {
         setOcrStatus('We saved the photo. Type or dictate the recipe below.');

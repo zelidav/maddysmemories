@@ -161,16 +161,44 @@ export async function uploadPhoto(dataUrl: string): Promise<{ photoUrl: string; 
 
 /* ============ OCR ============ */
 
-export async function ocr(dataUrl: string): Promise<{ text: string; notARecipe?: boolean }> {
+export interface OcrResult {
+  text: string;
+  notARecipe: boolean;
+  title?: string;
+  source?: string;
+  category?: string;
+  prepTime?: string;
+  ingredientsList?: string[];
+  instructionsList?: string[];
+}
+
+export async function ocr(dataUrl: string): Promise<OcrResult> {
   if (!API) {
-    // localStorage-only mode: skip OCR; user types/dictates
-    return { text: '' };
+    return { text: '', notARecipe: false };
   }
-  const r = await req<{ text: string; not_a_recipe?: boolean }>('/ocr', {
+  const r = await req<{
+    text: string;
+    not_a_recipe?: boolean;
+    title?: string;
+    source?: string;
+    category?: string;
+    prep_time?: string;
+    ingredients?: string[];
+    instructions?: string[];
+  }>('/ocr', {
     method: 'POST',
     body: JSON.stringify({ image: dataUrl }),
   });
-  return { text: r.text || '', notARecipe: r.not_a_recipe };
+  return {
+    text: r.text || '',
+    notARecipe: !!r.not_a_recipe,
+    title: r.title,
+    source: r.source,
+    category: r.category,
+    prepTime: r.prep_time,
+    ingredientsList: r.ingredients,
+    instructionsList: r.instructions,
+  };
 }
 
 /* ============ Auth ping ============ */
@@ -190,6 +218,62 @@ export async function login(password: string, kind: 'admin' | 'family'): Promise
     method: 'POST',
     body: JSON.stringify({ password, kind }),
   });
+}
+
+/* ============ Family Photos (rotating gallery) ============ */
+
+export interface FamilyPhoto {
+  id: string;
+  src: string;
+  thumb: string;
+  width: number;
+  height: number;
+  aspect: number;
+  portrait: boolean;
+  caption?: string;
+  uploaderName?: string;
+  uploaderRole?: 'admin' | 'family';
+  uploaderId?: string;
+  createdAt: number;
+}
+
+export async function listFamilyPhotos(): Promise<FamilyPhoto[]> {
+  if (LOCAL_ONLY) {
+    try { return JSON.parse(localStorage.getItem('mm.family_photos') || '[]'); } catch { return []; }
+  }
+  const { photos } = await req<{ photos: FamilyPhoto[] }>('/photos');
+  return photos;
+}
+
+export async function addFamilyPhoto(input: {
+  image: string;
+  caption?: string;
+  uploaderName?: string;
+  uploaderId?: string;
+}): Promise<FamilyPhoto> {
+  if (LOCAL_ONLY) {
+    const id = newId('fam');
+    const photo: FamilyPhoto = {
+      id, src: input.image, thumb: input.image,
+      width: 0, height: 0, aspect: 1, portrait: false,
+      caption: input.caption, uploaderName: input.uploaderName,
+      uploaderRole: 'admin', createdAt: now(),
+    };
+    const all = JSON.parse(localStorage.getItem('mm.family_photos') || '[]');
+    all.unshift(photo);
+    localStorage.setItem('mm.family_photos', JSON.stringify(all));
+    return photo;
+  }
+  return req<FamilyPhoto>('/photos', { method: 'POST', body: JSON.stringify(input) });
+}
+
+export async function deleteFamilyPhoto(id: string, uploaderId?: string): Promise<void> {
+  if (LOCAL_ONLY) {
+    const all = JSON.parse(localStorage.getItem('mm.family_photos') || '[]');
+    localStorage.setItem('mm.family_photos', JSON.stringify(all.filter((p: FamilyPhoto) => p.id !== id)));
+    return;
+  }
+  await req(`/photos/${id}`, { method: 'DELETE', body: JSON.stringify({ uploaderId: uploaderId || '' }) });
 }
 
 export const isLocalOnly = LOCAL_ONLY;
