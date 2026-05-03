@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#a83244">
+<title>Mom's Recipes</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23a83244'/%3E%3Ctext x='32' y='44' font-size='40' text-anchor='middle' fill='white' font-family='serif'%3E%26%23x1F374%3B%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>Mom's Recipes</h1>
+</header>
+
+<main>
+  <section id="home" class="view active">
+    <button id="add-recipe" class="big-btn primary">New Recipe</button>
+    <ul id="recipe-list" class="recipe-list" aria-label="Saved recipes"></ul>
+  </section>
+
+  <section id="capture" class="view">
+    <button class="back-btn" type="button">&lsaquo; Back</button>
+    <h2>Photograph the recipe card</h2>
+    <p class="hint">Lay the card flat. Get good light. Fill the frame.</p>
+    <label class="big-btn primary" for="photo-input">Take Photo</label>
+    <input id="photo-input" type="file" accept="image/*" capture="environment" hidden>
+    <div id="preview-wrap" hidden>
+      <img id="preview" alt="Recipe preview">
+      <div id="ocr-status" role="status" aria-live="polite"></div>
+      <button id="retake" class="big-btn" type="button">Retake</button>
+      <button id="continue" class="big-btn primary" type="button">Continue</button>
+    </div>
+  </section>
+
+  <section id="edit" class="view">
+    <button class="back-btn" type="button">&lsaquo; Back</button>
+    <h2>Recipe Details</h2>
+
+    <label for="recipe-title">Recipe name</label>
+    <input id="recipe-title" type="text" placeholder="e.g. Grandma's Apple Pie" autocomplete="off">
+
+    <label for="recipe-source">Where is this recipe from?</label>
+    <textarea id="recipe-source" rows="2" placeholder="e.g. From Aunt Rose, summer 1962"></textarea>
+    <button id="voice-source" class="voice-btn" type="button" aria-label="Dictate where it's from">Dictate</button>
+
+    <label for="recipe-text">The recipe</label>
+    <p class="hint">We tried to read the card. Fix anything wrong, or dictate it.</p>
+    <textarea id="recipe-text" rows="12" placeholder="Ingredients and steps..."></textarea>
+    <button id="voice-text" class="voice-btn" type="button" aria-label="Dictate the recipe">Dictate</button>
+
+    <button id="save-recipe" class="big-btn primary" type="button">Save</button>
+  </section>
+
+  <section id="detail" class="view">
+    <button class="back-btn" type="button">&lsaquo; Back</button>
+    <h2 id="d-title"></h2>
+    <p id="d-source" class="source"></p>
+    <img id="d-photo" alt="Recipe card">
+    <pre id="d-text"></pre>
+    <button id="share-recipe" class="big-btn primary" type="button">Share</button>
+    <button id="edit-recipe" class="big-btn" type="button">Edit</button>
+    <button id="delete-recipe" class="big-btn danger" type="button">Delete</button>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
