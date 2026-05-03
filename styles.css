@@ -273,18 +273,6 @@ input:focus, textarea:focus { outline: none; border-color: #a83244; }
 }
 
 label .optional { font-weight: 400; color: #888; font-size: 0.9em; }
-select#recipe-for {
-  display: block;
-  width: 100%;
-  padding: 0.75rem;
-  font-size: 1.05rem;
-  font-family: inherit;
-  border: 2px solid #ddd;
-  border-radius: 0.5rem;
-  background: #fff;
-  color: inherit;
-}
-select#recipe-for:focus { outline: none; border-color: #a83244; }
 
 .hdr-flora {
   position: absolute;

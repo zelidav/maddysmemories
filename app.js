@@ -43,8 +43,7 @@ function renderHome() {
       li.innerHTML = `
         <img class="empty-avatar" src="maddy-avatar.jpg" alt="Maddy">
         <strong>Welcome, Maddy.</strong>
-        <p>Tap <em>New Recipe</em> to photograph your first card.<br>
-        These recipes are being saved for Tyler, Marley, Hannah, Jack, Elliot, and Jordan. &#x273F;</p>`;
+        <p>Tap <em>New Recipe</em> to photograph your first card. &#x273F;</p>`;
     }
     list.appendChild(li);
     return;
