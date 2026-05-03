@@ -1,4 +1,4 @@
-# Mom's Recipes
+# Maddy's Memories
 
 Mobile-first PWA for photographing handwritten recipe cards, transcribing them with Claude vision, dictating provenance ("From Aunt Rose, 1962"), and sharing them.
 
