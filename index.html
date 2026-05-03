@@ -13,7 +13,8 @@
 <body>
 <header>
   <h1>Maddy's Memories</h1>
-  <p class="tagline">Recipes from Grandma Maddy's kitchen</p>
+  <p class="tagline">Recipes &amp; stories from Grandma Maddy's kitchen</p>
+  <span class="hdr-flora" aria-hidden="true">&#x273F;</span>
   <button id="tools-btn" class="tools-btn" type="button" aria-label="Tools" title="Tools">&#x22EE;</button>
 </header>
 
@@ -59,6 +60,19 @@
         <textarea id="recipe-source" rows="2" placeholder="e.g. From Aunt Rose, summer 1962"></textarea>
         <button id="voice-source" class="voice-btn" type="button" aria-label="Dictate where it's from">Dictate</button>
 
+        <label for="recipe-for">Who would love this? <span class="optional">(optional)</span></label>
+        <select id="recipe-for">
+          <option value="">&mdash; everyone &mdash;</option>
+          <option>Tyler</option>
+          <option>Marley</option>
+          <option>Hannah</option>
+          <option>Jack</option>
+          <option>Elliot</option>
+          <option>Jordan</option>
+          <option>David</option>
+          <option>The grandkids</option>
+        </select>
+
         <label for="recipe-text">The recipe</label>
         <p class="hint">We tried to read the card. Fix anything wrong, or dictate it.</p>
         <textarea id="recipe-text" rows="12" placeholder="Ingredients and steps..."></textarea>
@@ -73,6 +87,7 @@
     <button class="back-btn" type="button">&lsaquo; Back</button>
     <h2 id="d-title"></h2>
     <p id="d-source" class="source"></p>
+    <p id="d-for" class="for-tag" hidden></p>
     <div class="split">
       <div class="split-photo">
         <img id="d-photo" alt="Recipe card">

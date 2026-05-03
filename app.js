@@ -37,9 +37,15 @@ function renderHome() {
   if (!recipes.length) {
     const li = document.createElement('li');
     li.className = 'empty';
-    li.textContent = q
-      ? `No recipes match "${q}".`
-      : 'No recipes yet. Tap "New Recipe" to start.';
+    if (q) {
+      li.textContent = `No recipes match "${q}".`;
+    } else {
+      li.innerHTML = `
+        <img class="empty-avatar" src="maddy-avatar.jpg" alt="Maddy">
+        <strong>Welcome, Maddy.</strong>
+        <p>Tap <em>New Recipe</em> to photograph your first card.<br>
+        These recipes are being saved for Tyler, Marley, Hannah, Jack, Elliot, and Jordan. &#x273F;</p>`;
+    }
     list.appendChild(li);
     return;
   }
@@ -216,6 +222,7 @@ $('continue').addEventListener('click', () => {
   if (!state.editingId) {
     $('recipe-title').value = '';
     $('recipe-source').value = '';
+    $('recipe-for').value = '';
   }
   $('recipe-text').value = state.ocrText;
   if (state.photo) $('e-photo').src = state.photo;
@@ -279,6 +286,7 @@ $('save-recipe').addEventListener('click', () => {
     id,
     title,
     source: $('recipe-source').value.trim(),
+    forWhom: ($('recipe-for').value || '').trim(),
     text: $('recipe-text').value.trim(),
     photo: state.photo || (existing && existing.photo) || '',
     createdAt: existing ? existing.createdAt : Date.now(),
@@ -305,6 +313,13 @@ function openDetail(id) {
   state.editingId = id;
   $('d-title').textContent = r.title;
   $('d-source').textContent = r.source;
+  const dFor = $('d-for');
+  if (r.forWhom) {
+    dFor.textContent = `✿  For ${r.forWhom}`;
+    dFor.hidden = false;
+  } else {
+    dFor.hidden = true;
+  }
   $('d-photo').src = r.photo;
   $('d-text').textContent = r.text;
   show('detail');
@@ -348,6 +363,7 @@ $('edit-recipe').addEventListener('click', () => {
   state.ocrText = r.text;
   $('recipe-title').value = r.title;
   $('recipe-source').value = r.source;
+  $('recipe-for').value = r.forWhom || '';
   $('recipe-text').value = r.text;
   $('e-photo').src = r.photo || '';
   show('edit');

@@ -238,12 +238,63 @@ input:focus, textarea:focus { outline: none; border-color: #a83244; }
 }
 .recipe-list .empty {
   text-align: center;
-  color: #888;
-  border: none;
-  background: none;
-  padding: 2rem 1rem;
+  color: #555;
+  border: 1px dashed #d8c8a8;
+  background: rgba(255,255,255,0.55);
+  padding: 1.75rem 1.25rem;
   display: block;
   cursor: default;
+  border-radius: 1rem;
+}
+.recipe-list .empty strong { font-size: 1.25rem; display: block; margin: 0.75rem 0 0.5rem; font-family: Georgia, serif; }
+.recipe-list .empty p { margin: 0; line-height: 1.55; }
+.recipe-list .empty em { color: #a83244; font-style: normal; font-weight: 600; }
+.empty-avatar {
+  display: block;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto;
+  border: 3px solid #fdf6e3;
+  box-shadow: 0 4px 14px rgba(168,50,68,0.25);
+}
+
+.for-tag {
+  display: inline-block;
+  background: #fff3c0;
+  color: #8a6a08;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  border: 1px solid #ead78a;
+}
+
+label .optional { font-weight: 400; color: #888; font-size: 0.9em; }
+select#recipe-for {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1.05rem;
+  font-family: inherit;
+  border: 2px solid #ddd;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: inherit;
+}
+select#recipe-for:focus { outline: none; border-color: #a83244; }
+
+.hdr-flora {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  font-size: 1.6rem;
+  color: #f4d03f;
+  opacity: 0.9;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  pointer-events: none;
 }
 
 .source {
@@ -341,4 +392,7 @@ input:focus, textarea:focus { outline: none; border-color: #a83244; }
   .recipe-list li:active { background: #333; }
   #d-text { background: #2a2a2a; border-color: #444; }
   #ocr-status { background: #3a3220; border-left-color: #d4a017; color: #f0f0f0; }
+  .recipe-list .empty { background: rgba(255,255,255,0.05); border-color: #555; color: #d8d8d8; }
+  .for-tag { background: #3d3220; color: #f4d03f; border-color: #5a4920; }
+  select#recipe-for { background: #2a2a2a; color: #f0f0f0; border-color: #444; }
 }

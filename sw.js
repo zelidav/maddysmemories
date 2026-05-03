@@ -1,4 +1,4 @@
-const CACHE = 'maddys-memories-v2';
+const CACHE = 'maddys-memories-v3';
 const ASSETS = [
   './',
   'index.html',
@@ -9,6 +9,7 @@ const ASSETS = [
   'icon-192.png',
   'icon-512.png',
   'apple-touch-icon.png',
+  'maddy-avatar.jpg',
 ];
 
 self.addEventListener('install', (e) => {
