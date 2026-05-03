@@ -6,18 +6,27 @@
 <meta name="theme-color" content="#a83244">
 <title>Maddy's Memories</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23a83244'/%3E%3Ctext x='32' y='44' font-size='40' text-anchor='middle' fill='white' font-family='serif'%3E%26%23x1F374%3B%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header>
   <h1>Maddy's Memories</h1>
   <p class="tagline">Recipes from Grandma Maddy's kitchen</p>
+  <button id="tools-btn" class="tools-btn" type="button" aria-label="Tools" title="Tools">&#x22EE;</button>
 </header>
+
+<div id="tools-menu" class="tools-menu" hidden>
+  <button id="export-all" type="button">Export all (JSON)</button>
+  <button id="import-json" type="button">Import JSON&hellip;</button>
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+</div>
 
 <main>
   <section id="home" class="view active">
     <button id="add-recipe" class="big-btn primary">New Recipe</button>
+    <input id="search" class="search" type="search" placeholder="Search recipes&hellip;" autocomplete="off">
     <ul id="recipe-list" class="recipe-list" aria-label="Saved recipes"></ul>
   </section>
 
@@ -38,31 +47,43 @@
   <section id="edit" class="view">
     <button class="back-btn" type="button">&lsaquo; Back</button>
     <h2>Recipe Details</h2>
+    <div class="split">
+      <div class="split-photo">
+        <img id="e-photo" alt="Recipe card photo">
+      </div>
+      <div class="split-form">
+        <label for="recipe-title">Recipe name</label>
+        <input id="recipe-title" type="text" placeholder="e.g. Grandma's Apple Pie" autocomplete="off">
 
-    <label for="recipe-title">Recipe name</label>
-    <input id="recipe-title" type="text" placeholder="e.g. Grandma's Apple Pie" autocomplete="off">
+        <label for="recipe-source">Where is this recipe from?</label>
+        <textarea id="recipe-source" rows="2" placeholder="e.g. From Aunt Rose, summer 1962"></textarea>
+        <button id="voice-source" class="voice-btn" type="button" aria-label="Dictate where it's from">Dictate</button>
 
-    <label for="recipe-source">Where is this recipe from?</label>
-    <textarea id="recipe-source" rows="2" placeholder="e.g. From Aunt Rose, summer 1962"></textarea>
-    <button id="voice-source" class="voice-btn" type="button" aria-label="Dictate where it's from">Dictate</button>
+        <label for="recipe-text">The recipe</label>
+        <p class="hint">We tried to read the card. Fix anything wrong, or dictate it.</p>
+        <textarea id="recipe-text" rows="12" placeholder="Ingredients and steps..."></textarea>
+        <button id="voice-text" class="voice-btn" type="button" aria-label="Dictate the recipe">Dictate</button>
 
-    <label for="recipe-text">The recipe</label>
-    <p class="hint">We tried to read the card. Fix anything wrong, or dictate it.</p>
-    <textarea id="recipe-text" rows="12" placeholder="Ingredients and steps..."></textarea>
-    <button id="voice-text" class="voice-btn" type="button" aria-label="Dictate the recipe">Dictate</button>
-
-    <button id="save-recipe" class="big-btn primary" type="button">Save</button>
+        <button id="save-recipe" class="big-btn primary" type="button">Save</button>
+      </div>
+    </div>
   </section>
 
   <section id="detail" class="view">
     <button class="back-btn" type="button">&lsaquo; Back</button>
     <h2 id="d-title"></h2>
     <p id="d-source" class="source"></p>
-    <img id="d-photo" alt="Recipe card">
-    <pre id="d-text"></pre>
-    <button id="share-recipe" class="big-btn primary" type="button">Share</button>
-    <button id="edit-recipe" class="big-btn" type="button">Edit</button>
-    <button id="delete-recipe" class="big-btn danger" type="button">Delete</button>
+    <div class="split">
+      <div class="split-photo">
+        <img id="d-photo" alt="Recipe card">
+      </div>
+      <div class="split-form">
+        <pre id="d-text"></pre>
+        <button id="share-recipe" class="big-btn primary" type="button">Share</button>
+        <button id="edit-recipe" class="big-btn" type="button">Edit</button>
+        <button id="delete-recipe" class="big-btn danger" type="button">Delete</button>
+      </div>
+    </div>
   </section>
 </main>
 

@@ -1,4 +1,4 @@
-const CACHE = 'grandma-recipes-v1';
+const CACHE = 'maddys-memories-v2';
 const ASSETS = [
   './',
   'index.html',
@@ -6,6 +6,9 @@ const ASSETS = [
   'app.js',
   'config.js',
   'manifest.json',
+  'icon-192.png',
+  'icon-512.png',
+  'apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (e) => {

@@ -25,13 +25,21 @@ function escapeHtml(s) {
 }
 
 function renderHome() {
-  const recipes = loadRecipes().sort((a, b) => b.updatedAt - a.updatedAt);
+  const all = loadRecipes().sort((a, b) => b.updatedAt - a.updatedAt);
+  const q = ($('search')?.value || '').trim().toLowerCase();
+  const recipes = q
+    ? all.filter((r) =>
+        [r.title, r.source, r.text].some((s) => (s || '').toLowerCase().includes(q))
+      )
+    : all;
   const list = $('recipe-list');
   list.innerHTML = '';
   if (!recipes.length) {
     const li = document.createElement('li');
     li.className = 'empty';
-    li.textContent = 'No recipes yet. Tap "New Recipe" to start.';
+    li.textContent = q
+      ? `No recipes match "${q}".`
+      : 'No recipes yet. Tap "New Recipe" to start.';
     list.appendChild(li);
     return;
   }
@@ -49,6 +57,69 @@ function renderHome() {
     list.appendChild(li);
   }
 }
+
+$('search').addEventListener('input', renderHome);
+
+const toolsMenu = $('tools-menu');
+$('tools-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  toolsMenu.hidden = !toolsMenu.hidden;
+});
+document.addEventListener('click', (e) => {
+  if (!toolsMenu.hidden && !toolsMenu.contains(e.target) && e.target.id !== 'tools-btn') {
+    toolsMenu.hidden = true;
+  }
+});
+
+$('export-all').addEventListener('click', () => {
+  toolsMenu.hidden = true;
+  const data = {
+    exportedAt: new Date().toISOString(),
+    version: 1,
+    recipes: loadRecipes(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `maddys-memories-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+$('import-json').addEventListener('click', () => {
+  toolsMenu.hidden = true;
+  $('import-file').click();
+});
+
+$('import-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    const incoming = Array.isArray(data) ? data : data.recipes;
+    if (!Array.isArray(incoming)) throw new Error('Not a recipes export.');
+    const existing = loadRecipes();
+    const byId = new Map(existing.map((r) => [r.id, r]));
+    let added = 0, updated = 0;
+    for (const r of incoming) {
+      if (!r || !r.id || !r.title) continue;
+      if (byId.has(r.id)) updated++;
+      else added++;
+      byId.set(r.id, r);
+    }
+    saveRecipes([...byId.values()]);
+    renderHome();
+    alert(`Imported. Added ${added}, updated ${updated}.`);
+  } catch (err) {
+    alert('Import failed: ' + (err.message || err));
+  } finally {
+    e.target.value = '';
+  }
+});
 
 function fileToDataUrl(file) {
   return new Promise((res, rej) => {
@@ -147,6 +218,7 @@ $('continue').addEventListener('click', () => {
     $('recipe-source').value = '';
   }
   $('recipe-text').value = state.ocrText;
+  if (state.photo) $('e-photo').src = state.photo;
   show('edit');
 });
 
@@ -277,6 +349,7 @@ $('edit-recipe').addEventListener('click', () => {
   $('recipe-title').value = r.title;
   $('recipe-source').value = r.source;
   $('recipe-text').value = r.text;
+  $('e-photo').src = r.photo || '';
   show('edit');
 });
 
