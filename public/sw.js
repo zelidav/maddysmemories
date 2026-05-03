@@ -1,7 +1,7 @@
 // Maddy's Memories service worker
 // Strategy: stale-while-revalidate for same-origin GET; offline fallback to index.html.
 
-const VERSION = 'mm-v4';
+const VERSION = 'mm-v5';
 const SHELL = ['/', '/index.html', '/manifest.json', '/maddy-avatar.jpg', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {

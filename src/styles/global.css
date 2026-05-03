@@ -113,6 +113,13 @@ label .optional { font-weight: 400; text-transform: none; color: #aaa; font-size
   border-color: transparent;
   color: var(--ink);
 }
+.btn-fb {
+  background: #1877F2;
+  border-color: #145dbf;
+  color: #fff;
+}
+.btn-fb:hover { background: #145dbf; color: #fff; }
+.fb-ico { display: inline-block; vertical-align: -3px; }
 .btn-large {
   padding: 1.1rem 1.5rem;
   font-size: 1.1rem;

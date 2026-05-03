@@ -442,6 +442,85 @@ app.delete('/comments/:id', requireAdmin, async (req, res) => {
   res.json({ ok: true });
 });
 
+/* ============ Public OG / link-preview endpoints ============
+ * These are unauthenticated so Facebook's scraper, iMessage, Slack, etc.
+ * can read OG tags. The body redirects humans to the gated /family/* SPA URL.
+ */
+
+const escHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function ogPage({ title, description, image, redirectUrl }) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>${escHtml(title)} — Maddy's Memories</title>
+<meta name="description" content="${escHtml(description)}">
+<meta property="og:site_name" content="Maddy's Memories">
+<meta property="og:title" content="${escHtml(title)}">
+<meta property="og:description" content="${escHtml(description)}">
+<meta property="og:image" content="${escHtml(image)}">
+<meta property="og:type" content="article">
+<meta property="og:url" content="${escHtml(redirectUrl)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${escHtml(title)}">
+<meta name="twitter:description" content="${escHtml(description)}">
+<meta name="twitter:image" content="${escHtml(image)}">
+<meta http-equiv="refresh" content="0; url=${escHtml(redirectUrl)}">
+<style>body{font-family:Georgia,serif;background:#FAF3E0;color:#2C2A26;text-align:center;padding:3rem 1rem;line-height:1.5}a{color:#E8574A}</style>
+</head>
+<body>
+<p>Opening <a href="${escHtml(redirectUrl)}">${escHtml(title)}</a> in Maddy's Memories…</p>
+<script>location.replace(${JSON.stringify(redirectUrl)});</script>
+</body>
+</html>`;
+}
+
+app.get('/share/recipes/:id', async (req, res) => {
+  try {
+    const doc = await recipesCol().doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).type('text/plain').send('Recipe not found.');
+    const r = doc.data();
+    const facets = [
+      r.source && `— ${r.source}`,
+      r.category && r.category !== 'other' && r.category[0].toUpperCase() + r.category.slice(1),
+      r.prepTime,
+    ].filter(Boolean).join(' • ');
+    const desc = facets || (r.text || '').replace(/\s+/g, ' ').slice(0, 200);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.send(ogPage({
+      title: r.title || 'A recipe from Maddy',
+      description: desc || "From Madeline's recipe box.",
+      image: r.photoUrl || 'https://maddysmemories.com/maddy-avatar.jpg',
+      redirectUrl: `https://maddysmemories.com/family/recipes/${r.id}`,
+    }));
+  } catch (err) {
+    console.error('OG recipe error:', err);
+    res.status(500).type('text/plain').send('Could not load this recipe.');
+  }
+});
+
+app.get('/share/journal/:id', async (req, res) => {
+  try {
+    const doc = await journalCol().doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).type('text/plain').send('Entry not found.');
+    const e = doc.data();
+    const desc = (e.body || '').replace(/\s+/g, ' ').slice(0, 240);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.send(ogPage({
+      title: e.title || 'A story from Maddy',
+      description: desc || "From Madeline's journal.",
+      image: 'https://maddysmemories.com/maddy-avatar.jpg',
+      redirectUrl: `https://maddysmemories.com/family/journal/${e.id}`,
+    }));
+  } catch (err) {
+    console.error('OG journal error:', err);
+    res.status(500).type('text/plain').send('Could not load this entry.');
+  }
+});
+
 /* ============ Listen ============ */
 
 app.listen(PORT, () => {

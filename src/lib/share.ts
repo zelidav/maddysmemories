@@ -37,3 +37,14 @@ export async function shareRecipe(opts: {
 export function fbShareUrl(pageUrl: string): string {
   return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
 }
+
+const API = import.meta.env.VITE_API_URL || '';
+
+/** URL that FB / iMessage / etc. will scrape for OG meta.
+ * If the API is configured, route through /share/<kind>/:id (server-rendered OG).
+ * Falls back to the family SPA URL in localStorage-only mode.
+ */
+export function previewUrl(kind: 'recipes' | 'journal', id: string): string {
+  if (API) return `${API}/share/${kind}/${id}`;
+  return `${location.origin}/family/${kind}/${id}`;
+}
